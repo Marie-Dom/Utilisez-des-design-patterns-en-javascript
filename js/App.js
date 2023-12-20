@@ -1,29 +1,34 @@
 class App {
-    constructor() {
-        this.$moviesWrapper = document.querySelector('.movies-wrapper')
-        
-        this.oldMoviesApi = new MovieApi('/data/old-movie-data.json')
-        this.newMoviesApi = new MovieApi('/data/new-movie-data.json')
-    }
+  constructor() {
+    this.$moviesWrapper = document.querySelector(".movies-wrapper");
 
-    async main() {
-        const oldMoviesData = await this.oldMoviesApi.getMovies()
-        const newMoviesData = await this.newMoviesApi.getMovies()
+    // this.oldMoviesApi = new MovieApi('/data/old-movie-data.json')
+    this.moviesApi = new MovieApi("/data/new-movie-data.json");
+    this.externalMoviesApi = new MovieApi("/data/external-movie-data.json");
+  }
 
-        const OldMovies = oldMoviesData
-            .map(movie => new MoviesFactory(movie, 'oldApi'))
-        const NewMovies = newMoviesData.map(movie => new MoviesFactory(movie, 'newApi'))
+  async main() {
+    // const oldMoviesData = await this.oldMoviesApi.getMovies()
+    const moviesData = await this.moviesApi.getMovies();
+    const externalMoviesData = await this.externalMoviesApi.getMovies();
 
-        const FullMovies = OldMovies.concat(NewMovies)
-        
-        FullMovies.forEach(movie => {
-                const Template = new MovieCard(movie)
-                this.$moviesWrapper.appendChild(
-                    Template.createMovieCard()
-                )
-            })
-    }
+    // const OldMovies = oldMoviesData
+    //     .map(movie => new MoviesFactory(movie, 'oldApi'))
+    const Movies = moviesData.map(
+      (movie) => new MoviesFactory(movie, "newApi")
+    );
+    const ExternalMovies = externalMoviesData.map(
+      (movie) => new MoviesFactory(movie, "externalApi")
+    );
+
+    const FullMovies = Movies.concat(ExternalMovies);
+
+    FullMovies.forEach((movie) => {
+      const Template = new MovieCard(movie);
+      this.$moviesWrapper.appendChild(Template.createMovieCard());
+    });
+  }
 }
 
-const app = new App()
-app.main()
+const app = new App();
+app.main();
