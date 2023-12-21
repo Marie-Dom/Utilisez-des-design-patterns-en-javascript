@@ -13,7 +13,7 @@ class ExternalMovie {
     return `/assets/${this._medias.picture}`;
   }
   get thumbnail() {
-    return `/assets/thumbnail/${this._medias.thumbnail}`;
+    return `/assets/thumbnails/${this._medias.thumbnail}`;
   }
   get released_in() {
     return this._infos.released_in;
