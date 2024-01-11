@@ -1,41 +1,49 @@
 class App {
-    constructor() {
-        this.$moviesWrapper = document.querySelector('.movies-wrapper')
-        this.$modalWrapper = document.querySelector('.modal')
-        
-        this.moviesApi = new MovieApi('/data/new-movie-data.json')
-        this.externalMoviesApi = new MovieApi('/data/external-movie-data.json')
-    }
+  constructor() {
+    this.$moviesWrapper = document.querySelector(".movies-wrapper");
+    this.$modalWrapper = document.querySelector(".modal");
 
-    async main() {
-        const moviesData = await this.moviesApi.get()
-        const externalMoviesData = await this.externalMoviesApi.get()
+    this.moviesApi = new MovieApi("/data/new-movie-data.json");
+    this.externalMoviesApi = new MovieApi("/data/external-movie-data.json");
 
-        const Movies = moviesData.map(movie => new MoviesFactory(movie, 'newApi'))
-        const ExternalMovies = externalMoviesData.map(movie => new MoviesFactory(movie, 'externalApi'))
+    // WishLib Pub/sub
+    this.WishListSubject = new WishListSubject();
+    this.WhishListCounter = new WhishListCounter();
 
-        const FullMovies = Movies.concat(ExternalMovies)
+    this.WishListSubject.subscribe(this.WhishListCounter);
+  }
 
-        const Form = new FormModal()
-        Form.render()
+  async main() {
+    const moviesData = await this.moviesApi.get();
+    const externalMoviesData = await this.externalMoviesApi.get();
 
-        const Filter = new FilterForm(FullMovies)
-        Filter.render()
+    const Movies = moviesData.map(
+      (movie) => new MoviesFactory(movie, "newApi")
+    );
+    const ExternalMovies = externalMoviesData.map(
+      (movie) => new MoviesFactory(movie, "externalApi")
+    );
 
-        const Sorter = new SorterForm(FullMovies)
-        Sorter.render()
+    const FullMovies = Movies.concat(ExternalMovies);
 
-        FullMovies.forEach(movie => {
-                const Template = movieCardWithPlayer(
-                    new MovieCard(movie)
-                )
+    const Form = new FormModal();
+    Form.render();
 
-                this.$moviesWrapper.appendChild(
-                    Template.createMovieCard()
-                )
-        })
-    }
+    const Filter = new FilterForm(FullMovies);
+    Filter.render();
+
+    const Sorter = new SorterForm(FullMovies);
+    Sorter.render();
+
+    FullMovies.forEach((movie) => {
+      const Template = movieCardWithPlayer(
+        new MovieCard(movie, this.WishListSubject)
+      );
+
+      this.$moviesWrapper.appendChild(Template.createMovieCard());
+    });
+  }
 }
 
-const app = new App()
-app.main()
+const app = new App();
+app.main();
